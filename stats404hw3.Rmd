@@ -1,0 +1,577 @@
+---
+title: "Stats 204 Homework 3"
+author: "Jordan Berninger"
+date: "10/27/2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Desktop/Stat 204/")
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readr)
+```
+
+Chapter 4:  2, 6, 8 
+
+Chapter 6: 2, 3 (a, b and d), 5, 7 
+
+Chapter 7: 7, 8
+
+Chapter 8: 2, 3, 4, 5
+
+## Problem 4.2
+
+(Speed and stopping distance (continued)). Suppose that one wishes to compare linear and quadratic fits to the (speed,dist) observations. One can construct these two fits in R using the code
+
+```{r}
+data(cars)
+fit.linear = lm(dist ~ speed, data=cars)
+fit.quadratic = lm(dist ~ speed + I(speed^2), data=cars)
+```
+
+a. Construct a scatterplot of speed and stopping distance.
+
+```{r}
+plot(cars$speed, cars$dist, main = "Speed vs Distance", xlab = "speed", ylab = "distance")
+```
+
+b. Using the abline function with argument fit.linear, overlay the best line fit using line type “dotted” and using a line width of 2.
+
+```{r}
+plot(cars$speed, cars$dist, main = "Linear Fit", xlab = "speed", ylab = "distance")
+abline(reg = fit.linear, lty = "dotted", lwd = 2)
+```
+
+
+c. Using the lines function, overlay the quadratic fit using line type “long-dash” and a line width of 2.
+
+```{r}
+newdat <- seq(from = min(cars$speed) - 2, to = max(cars$speed) + 2, length.out = 100)
+quadratic.fitted <- predict(fit.quadratic, list(speed = newdat))
+plot(cars$speed, cars$dist, main = "Quadratic Fit and Linear Fit", xlab = "speed", ylab = "distance")
+abline(reg = fit.linear, lty = "dotted", lwd = 2)
+lines(x = newdat, y = quadratic.fitted, lty = "longdash", lwd = 2)
+```
+
+
+d. Use a legend to show the line types of the linear and quadratic fits.
+
+```{r}
+newdat <- seq(from = min(cars$speed) - 2, to = max(cars$speed) + 2, length.out = 100)
+quadratic.fitted <- predict(fit.quadratic, list(speed = newdat))
+plot(cars$speed, cars$dist, main = "Quadratic Fit and Linear Fit", xlab = "speed", ylab = "distance")
+abline(reg = fit.linear, lty = 3, lwd = 2)
+lines(x = newdat, y = quadratic.fitted, lty = 5, lwd = 2)
+
+
+legend("topleft", c("linear", "quadratic"), lty = c("dotted", "longdash"), 
+       lwd = 2, inset = 0.05, title = 'Fit')
+```
+
+e. Redo parts (a) - (d) using two contrasting colors (say red and blue) for the two different fits.
+
+Since I was just adding layers, I will only produce one additional plot.
+
+```{r}
+newdat <- seq(from = min(cars$speed) - 2, to = max(cars$speed) + 2, length.out = 100)
+quadratic.fitted <- predict(fit.quadratic, list(speed = newdat))
+plot(cars$speed, cars$dist, main = "Quadratic Fit and Linear Fit", xlab = "speed", ylab = "distance")
+abline(reg = fit.linear, lty = 3, lwd = 2, col = "red")
+lines(x = newdat, y = quadratic.fitted, lty = 5, lwd = 2, col = "blue")
+
+
+legend("topleft", c("linear", "quadratic"), c("dotted", "longdash"),
+       lwd = 2, col = c("red", "blue"),
+       inset = 0.05, title = 'Fit')
+```
+
+## Problem 4.6
+
+Suppose one is interesting in displaying three members of the beta family of curves, where the beta density with shape parameters a and b (denoted by Beta(a,b)) is given by
+$f(y) = \frac{1}{B(a,b)}y^{a-1}(1-y)^{b-1} , 0<y<1$
+One can draw a single beta density, say with shape parameters a = 5 and b = 2, using the curve function:
+$curve(dbeta(x, 5, 2), from=0, to=1))$
+
+a. Use three applications of the curve function to display the Beta(2, 6), Beta(4, 4), and Beta(6, 2) densities on the same plot. (The curve function with the add=TRUE argument will add the curve to the current plot.)
+
+```{r}
+as <- c(2,4,6)
+bs <- c(6,4,2)
+plot(curve(dbeta(x, as[1], bs[1]), from = 0, to = 1), type = "l", 
+     xlab = "x", ylab = "Beta(x, a, b)",
+     main = "Beta Curves",
+     ylim = c(0, 3))
+curve(dbeta(x, as[2], bs[2]), from = 0, to = 1, type = "l", add = TRUE)
+curve(dbeta(x, as[3], bs[3]), from = 0, to = 1, type = "l", add = TRUE)
+
+```
+
+
+b. Use the following R command to title the plot with the equation of the beta density.
+```{r}
+as <- c(2,4,6)
+bs <- c(6,4,2)
+plot(curve(dbeta(x, as[1], bs[1]), from = 0, to = 1), type = "l", 
+     xlab = "x", ylab = "Beta(x, a, b)",
+     ylim = c(0, 3))
+curve(dbeta(x, as[2], bs[2]), from = 0, to = 1, type = "l", add = TRUE)
+curve(dbeta(x, as[3], bs[3]), from = 0, to = 1, type = "l", add = TRUE)
+title(expression(f(y)==frac(1,B(a,b))*y^{a-1}*(1-y)^{b-1}))
+```
+
+
+c. Using the text function, label each of the beta curves with the corresponding values of the shape parameters a and b.
+
+I used the following code to add the labels. RMarkdown does not allow me to use the locator
+
+```{r}
+as <- c(2,4,6)
+bs <- c(6,4,2)
+plot(curve(dbeta(x, as[1], bs[1]), from = 0, to = 1), type = "l", 
+     xlab = "x", ylab = "Beta(x, a, b)",
+     ylim = c(0, 3))
+curve(dbeta(x, as[2], bs[2]), from = 0, to = 1, type = "l", add = TRUE)
+curve(dbeta(x, as[3], bs[3]), from = 0, to = 1, type = "l", add = TRUE)
+title(expression(f(y)==frac(1,B(a,b))*y^{a-1}*(1-y)^{b-1}))
+#pos <- locator(3) # locatorr() does not work well with RMarkdown
+text(x=c(0.1, 0.525, 0.7), y = c(2.2, 1.75, 2.5), labels = c("B(a = 2, b = 6)", "B(a = 4, b = 4)", "B(a = 6, b = 2)"))
+```
+
+
+d. Redraw the graph using different colors or line types for the three beta density curves.
+
+```{r}
+as <- c(2,4,6)
+bs <- c(6,4,2)
+plot(curve(dbeta(x, as[1], bs[1]), from = 0, to = 1), type = "l", 
+     xlab = "x", ylab = "Beta(x, a, b)",
+     ylim = c(0, 3), col = "orange", lwd = 2)
+curve(dbeta(x, as[2], bs[2]), from = 0, to = 1, type = "l", add = TRUE, col = "pink", lwd = 2)
+curve(dbeta(x, as[3], bs[3]), from = 0, to = 1, type = "l", add = TRUE, col = "lightblue", lwd = 2)
+title(expression(f(y)==frac(1,B(a,b))*y^{a-1}*(1-y)^{b-1}))
+#pos <- locator(3) # locatorr() does not work well with RMarkdown
+text(x=c(0.1, 0.525, 0.7), y = c(2.2, 1.75, 2.5), labels = c("B(a = 2, b = 6)", "B(a = 4, b = 4)", "B(a = 6, b = 2)"), col = c("orange", "pink", "lightblue"))
+```
+
+
+e. Instead of using the text function, add a legend to the graph that shows the color or line type for each of the beta density curves.
+
+```{r}
+as <- c(2,4,6)
+bs <- c(6,4,2)
+plot(curve(dbeta(x, as[1], bs[1]), from = -1, to = 2), type = "l", 
+     xlab = "x", ylab = "Beta(x, a, b)",
+     ylim = c(0, 3), col = "orange", lwd = 2)
+curve(dbeta(x, as[2], bs[2]), from = -1, to = 2, type = "l", add = TRUE, col = "pink", lwd = 2)
+curve(dbeta(x, as[3], bs[3]), from = -1, to = 1, type = "l", add = TRUE, col = "lightblue", lwd = 2)
+title(expression(f(y)==frac(1,B(a,b))*y^{a-1}*(1-y)^{b-1}))
+#pos <- locator(3) # locatorr() does not work well with RMarkdown
+legend("topright", c("B(a = 2, b = 6)", "B(a = 4, b = 4)", "B(a = 6, b = 2)"), 
+       col = c("orange", "pink", "lightblue"), 
+       lwd = 2, inset = 0.05, title = 'Beta Parameters')
+```
+
+
+## Problem 4.8
+
+In Exercise 4.7, the waiting times for the Old Faithful geysers were compared for the short and long eruptions where the variable length in the faithful data frame defines the duration of the eruption.
+
+a. Suppose a data frame dframe contains a numeric variable num.var and a factor factor.var. After the ggplot2 package has been loaded, then the R commands
+
+$ggplot(dframe, aes(x = num.var, color = factor.var)) + geom\_density()$
+
+will construct overlapping density estimates of the variable num.var for each value of the factor factor.var. Use these commands to construct overlapping density estimates of the waiting times of the geysers with short and long eruptions.
+
+b. With a data frame dframe containing a numeric variable num.var and a factor factor.var, the ggplot2 syntax
+
+$ggplot(dframe, aes(y = num.var, x = factor.var)) + geom\_boxplot()$
+
+will construct parallel boxplots of the variable num.var for each value of the factor factor.var. Use these commands to construct parallel boxplots of the waiting times of the geysers with short and long eruptions.
+
+```{r}
+data(faithful)
+faithful %>% mutate(eruptions.group = ifelse(eruptions < 3.2, "short", "long")) %>% 
+    ggplot(aes(x = waiting, color = eruptions.group)) + geom_density() +
+    ggtitle("Density of Waiting Times for Short vs Long Eruptions (>3.2)")
+```
+
+
+
+```{r}
+faithful %>% mutate(eruptions.group = ifelse(eruptions < 3.2, "short", "long")) %>%
+    ggplot(aes(y = waiting, x = eruptions.group)) + geom_boxplot() + 
+    ggtitle("Distribution of Waiting times for Short vs Long Eruptions (>3.2)")
+```
+
+
+## Problem 6.2
+The datafile “nyc.marathon.txt” contains the gender, age, and completion time (in minutes) for 276 people who completed the 2010 New York City Marathon. It was reported that the mean ages of men and women marathoners in 2005 were respectively 40.5 and 36.1.
+
+a. Create a new dataframe “women.marathon” that contains the ages and completion times for the women marathoners.
+
+I downloaded the csv file from <http://personal.bgsu.edu/~mrizzo/Rx/Rx-data/>. Then I filtered it for females, selected the desired columns and saved the output as a new dataframe.
+
+```{r}
+marathon <- read_csv("~/Desktop/Stat 204/nyc-marathon.csv")
+women.marathon <- marathon %>% filter(Gender == "female") %>% dplyr::select(c("Minutes", "Age"))
+```
+
+
+b. Use the t.test function to construct a test of the hypothesis that the mean age of women marathoners is equal to 36.1.
+
+We can put the value of 36.1 in as the $\mu$ parameter for the t.test. Alternatively, we could've tested whether the mean of $Age - 36.1$ is equal to zero. This t.test has an extremely low p-value, so we can reject the null hypothesis that the population mean is equal to $36.1$. 
+
+```{r}
+t.test(women.marathon$Age, mu = 36.1)
+```
+
+
+c. As an alternative method, use the wilcox.test function to test the hypothesis that the median age of women marathoners is equal to 36.1. Compare this test with the t-test used in part (b).
+
+The Wilcox signed rank test places less assumptions on the underlying distribution than the t-test. The Wilcox test only assumes that the distribution is symmetric around is median. We produce a histogram of the ages below with a vertical line at the median and note that the distribution appears fairly symmetric around the median.
+
+```{r}
+ggplot(data = women.marathon, aes(x = Age)) + geom_histogram(bins = 40) + 
+  geom_vline(xintercept = median(women.marathon$Age))
+```
+
+The text book also produces a QQ plot to as a diagnostic to confirm that the data is symetrically distributed around the median. We produce that plot below and see that the data appears to be symmetrically distributed around the median.
+
+This Wilcox test returns another extremely low p-value, so we reject the null hypothesis that the population mean is equal to $36.1$.
+
+```{r}
+wilcox.test(women.marathon$Age, mu = 36.1)
+```
+
+
+d. Construct a 90% interval estimate for the mean age of women marathoners.
+
+Since we want a confidence interval for the mean (and not the median), we will use the t.test function with $conf.level = 0.90$ to get the 90% confidence interval for the mean age of women marathones, which we see to be $(40.09, 43.03)$
+
+```{r}
+t.test(women.marathon$Age, conf.level = 0.90)
+```
+
+## Problem 6.3 (a, b)
+From the information in the 2005 report, one may believe that men marathoners tend to be older than women marathons.
+
+a. Use the t.test function to construct a test of the hypothesis that the mean ages of women and men marathoners are equal against the alternative hypothesis that the mean age of men is larger.
+
+We filter the dataset by gender and then compare the ages with a t.test with the alternative hypothesis being "less", meaning the mean age from the first vector (women) is greater than the mean age from the second vector (men). The resulting t.test has a p-value = 0.007443, which in most cases, is enough to reject the null hypothesis. This t.test indicates male marathon runners are older.
+
+```{r}
+t.test(data = marathon, Age ~ Gender,
+       paired = FALSE,
+       alternative = "less")
+```
+
+
+b. Construct a 90% interval estimate for the difference in mean ages of men and women marathoners.
+
+The confidence interval for the difference in mean ages between males and females is $(-\infty, 1.420086)$. 
+
+```{r}
+t.test(data = marathon, Age ~ Gender,
+       paired = FALSE,
+       alternative = "less",
+       conf.level = 0.90)
+```
+
+## Problem 6.5
+
+The datafile “buffalo.cleveland.snowfall.txt” contains the total snowfall in inches for the cities Buffalo and Cleveland for the seasons 1968-69 through 2008-09.
+
+a. Compute the differences between the Buffalo snowfall and the Cleveland snowfall for all seasons.
+
+```{r}
+snow <- read.table("buffalo.cleveland.snowfall.txt", header = TRUE) %>%
+    mutate(diff = Cleveland - Buffalo)
+```
+
+
+b. Using the t.test function with the difference data, test the hypothesis that Buffalo and Cleveland get, on average, the same total snowfall in a season.
+
+The t.test on the difference in snowfall returns an extremely low p-value, so we reject the null hypothesis that the two cities have the same average snowfall. Given how we defined the difference variables, a negative value for the difference in means tells us that Buffalo has more snowfall.
+
+```{r}
+t.test(snow$diff)
+```
+
+
+c. Use the t.test function to construct a 95% confidence interval of the mean difference in seasonal snowfall.
+
+The default parameter for confidence level is 95%, but we will state that explicitly here anyways.
+
+```{r}
+t.test(snow$diff, conf.level = 0.95)$conf.int
+```
+
+
+## Problem 6.7
+
+In Example 1.2, the height of the election winner and loser were collected for the U.S. Presidential elections of 1948 through 2008. Suppose you are interested in testing the hypothesis that the mean height of the election winner is equal to the mean height of the election loser. Assuming that this data represent paired data from a hypothetical population of elections, use the t.test function to test this hypothesis. Interpret the results of this test.
+
+We read in the data as we did before, run the paired t.test. The p-value = 0.2041 provides very weak evidence to reject the null hypothesis, indicating equivalent means of the winner's and opponent's heights. We also note that the confidence interval for the difference in means includes zero.
+
+```{r}
+winner = c(185, 182, 182, 188, 188, 188, 185, 185, 177, 182, 182, 193, 183, 179, 179, 175)
+opponent = c(175, 193, 185, 187, 188, 173, 180, 177, 183,  185, 180, 180, 182, 178, 178, 173)
+pres <- data.frame(winner, opponent)
+
+t.test(pres$winner, pres$opponent, paired = TRUE)
+```
+
+
+## Problem 7.7
+
+For the cars data in Example 7.1, compare the coefficient of determination R2 for the two models (with and without intercept term in the model). Hint: Save the fitted model as L and use summary(L) to display R2. Interpret the value of R2 as a measure of the fit.
+
+R-squared is a metric that tells us the percentage of variance in the response variablea (distance here) is explained by the model. A higher R-squared indicates a model that explains more variance in the response, however, R-squared generally increases when we add parameters to the model, so it is not the best metric for a just model comparison here. Adjusted R-squared only increases when we add a parameter if the parameter improves the model more than expected by chance. First we fit the model with an intercept term and return the summary noting the  $Multiple R^2 = 0.6511,	Adjusted R^2 = 0.6438$
+
+```{r}
+data(cars)
+
+L1 = lm(data = cars, dist ~ speed)
+
+summary(L1)
+```
+
+Now we fit the model without the intercept term, this is also called regression through the origin, and return the model summary. Here we see $Multiple R^2 = 0.8963,	Adjusted R^2 = 0.8942$
+
+```{r}
+L2 = lm(data = cars, dist ~ speed + 0)
+
+summary(L2)
+```
+
+This is an interesting result because the smaller model (L2) has a higher $R^2$ and $Adjusted R^2$. When we are performing regression through the orgin, we are stipulating that $E(Y|x=0) = 0$ which changes how we compute $SS_{model}$ and $SS_{residual}$ - the two main components of the formula for coefficient of determination. Accordingly, we are not comparing apples to apples with this metric here. I think anova() is a better way to compare these models, this indicates that the model without the the intercept term is better.
+
+```{r}
+anova(L1, L2)
+```
+
+
+## Problem 7.8
+
+Refer to the cars data in Example 7.1. Create a new variable speed2 equal to the square of speed. Then use lm to fit a quadratic model. The corresponding model formula would be dist ~ speed + speed2. Use curve to add the estimated quadratic curve to the scatterplot of the data and comment on the fit. How does the fit of the model compare with the simple linear regression model of Example 7.1 and Exercise 7.7?
+
+This is very similar to Exercise 4.2, so I will bring some of the code from that problem down here. Visually, the quadratic model looks very good - it fits the low speed values very well, and is able to model some of the increased variance in distance as speed gets high (above 20). Visually, it looks better then the linear model, 
+
+```{r}
+L3 <- lm(data = mutate(cars, speed2 = speed^2), dist ~ speed + speed2)
+
+newdat <- seq(from = min(cars$speed) - 2, to = max(cars$speed) + 2, length.out = 100)
+quadratic.fitted <- predict(L3, list(speed = newdat, speed2 = newdat^2))
+
+plot(cars$speed, cars$dist, main = "Quadratic Fit and Linear Fit", xlab = "speed", ylab = "distance")
+abline(reg = L1, lty = 3, lwd = 2, col = "orange")
+abline(reg = L2, lty = 1, lwd = 2, col = "pink")
+lines(x = newdat, y = quadratic.fitted, lty = 5, lwd = 2, col = "lightblue")
+
+
+legend("topleft", c("linear (with intercept)", "linear (origin)", "quadratic"), 
+       lty = c("dotted", "solid", "longdash"),
+       col = c("orange", "pink", "lightblue"), 
+       lwd = 2, inset = 0.05, title = 'Fit')
+```
+
+To compare these models, it is also important to look at the anova table. Here, we see that the quadratic model has a lower RSS, but it is not significant enough (at say, alpha = 0.05) to conclude that the quadratic model performs significantly better than the linear model with intercept term.
+
+```{r}
+anova(L1, L3)
+```
+
+## Problem 8.2
+
+The PlantGrowth data is an R dataset that contains results from an experiment on plant growth. The yield of a plant is measured by the dried weight of the plant. The experiment recorded yields of plants for a control group and two different treatments. After a preliminary exploratory data analysis, use one-way ANOVA to analyze the differences in mean yield for the three groups. Start with the exploratory data analysis, and also check model assumptions. What conclusions, if any, can be inferred from this sample data?
+
+First, we can get some basic info - for each group, the number of data points, the mean value and the sample variance. We want to do a one way anova test, so its important to know if the variances between the groups are approximately equal.
+
+```{r}
+data(PlantGrowth)
+PlantGrowth %>% group_by(group) %>%
+    summarise(n.data.pts = n(),
+              weight.mean = mean(weight),
+              weight.var = var(weight))
+```
+
+Data visualizations are better than boxes of numbers:
+
+```{r}
+
+ggplot(data = PlantGrowth, aes(x = group, y = weight, fill = group)) + geom_boxplot() +
+    ggtitle("Distribution of Weights for each group")
+```
+
+We can also visualize this with a histogram:
+
+```{r, warning = FALSE}
+ggplot(data = PlantGrowth, aes(x = weight)) + 
+    geom_histogram(aes(fill = group), bins = 20) +
+    geom_density() + 
+    ggtitle("Histogram of Weights by Group")
+```
+
+
+This box plot is interesting - the means vary from group to group and while the variances look similar, this is not conclusive. More rigorous methods of comparison are needed. We go to the one-way Anova test. There is no reason to assume the variance are equal here.
+
+```{r}
+oneway.test(data = PlantGrowth, weight ~ group)
+```
+
+Using an alpha value of 0.05, which is standard, we can reject the null hypothesis in this case and conclude that not all of the group means are equal. However, the one-way anova test does not tell us which pair / pairs / of group means were detected to be different. This is good - the visual diagnostics were not totally conclusive, and the anova test gives us a p-value that can go either way (if we want to be really strict, at say alpha = 0.01, we would fail to reject the null hypothesis, which is a reasonable conclusion given the data).
+
+## Problem 8.3
+
+The iris data has 50 observations of four measurements for each of three species of iris: setosa, versicolor, and virginica. We are interested in possible differences in the sepal length of iris among the three species. Perform a preliminary analysis as in Example 8.3. Write the effects model for a one-way ANOVA. What are the unknown parameters? Next fit a one-way ANOVA model for Sepal.Length by Species using lm. Display the ANOVA table. What are the parameter estimates?
+
+Since we are primarily interested in Sepal Length, we will begin with boxplots for each group:
+
+```{r}
+data(iris)
+ggplot(data = iris, aes(x = Species, y = Sepal.Length, fill = Species)) + geom_boxplot() + 
+    ggtitle("Boxplots of Sepal Length Distributions by Species")
+```
+
+Immediately, we can see evidence of a significant difference in group means. The boxes of the boxplots barely overlap, and it seems like the groups might have unequal variances. The same data in a histogram is interesting, but a little less insightful in my opinion. We note that the Speal Length's density estimation is approximately normal for each group
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Length, fill = Species)) + geom_histogram(bins = 25) + 
+    facet_grid(~Species) +
+    geom_density() +
+    ggtitle("Histogram of Sepal Length Distributions by Species")
+```
+
+The other numerical variables are not asked about explicitly, but it is important to look at the correlations between these variables and visualize their relationships with scatterplots.
+
+```{r}
+iris %>% 
+    dplyr::select(c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")) %>%
+    cor()
+```
+
+There are many high correlations here, but it is interesting to note the correlation between Speal Length and Sepal Width is negative and weak (correlation = -0.117). Scatterplots of Sepal Length vs each of the other variables seems useful.
+
+```{r}
+ggplot(data = iris, aes(y = Sepal.Length, x = Sepal.Width, col = Species)) + geom_point() + 
+    geom_smooth(method = "loess", formula = "y ~ x") + 
+    ggtitle("Sepal Length vs Sepal Width")
+```
+
+This plot is interesting because while we see a negative correlation between Sepal Length and Sepal Width overall, it looks like there is a weak positive correaltion between these variables, within each Species.
+
+```{r}
+ggplot(data = iris, aes(y = Sepal.Length, x = Petal.Length, col = Species)) + geom_point() + 
+    ggtitle("Sepal Length vs Petal Length")
+```
+
+```{r}
+ggplot(data = iris, aes(y = Sepal.Length, x = Petal.Width, col = Species)) + geom_point() + 
+    ggtitle("Sepal Length vs Petal Width")
+```
+
+The Petal Length and Petal Width plots plot shows us that the mean petal length  and width for the different species are dramatically different. Setosa's petals are, on average, much smaller in both dimensions than the other species. Virginica's petals are the biggest in both dimensions. Now we can do the one way anova test, there is no reason to assume equal variances.
+
+```{r}
+oneway.test(data = iris, Sepal.Length ~ Species)
+```
+
+The one-way test returns an extremely low p-value, so we have strong evidence to reject the null hypothesis. We conclude that not all of the groups have the same mean Sepal Length. Again, the one-way test does not tell us which groups have significantly different means, but the visualizations indicate that Setosa (smallest) and Virginica (largest) have significantly different means at the very least.
+
+## Problem 8.4
+
+Refer to your results from Exercise 8.3. What are the assumptions required for inference? Analyze the residuals of the model to assess whether there is a serious departure from any of these assumptions. How can you check for normality of the error variable?
+
+When performing a one-way anova test, we care assuming (1) the data points come from indpendent random samples and (2) the response variable follows a normal distribution. If we want, we can also assume that the groups have equal variances, but we do not make that assumption here. The aov() model provides some in-built diagnostic plots that help us check for normality of the residuals. We display these visual disgnostics below:
+
+
+```{r}
+L <- aov(data = iris, Sepal.Length ~ Species)
+par(mfrow = c(2,2))
+plot(L)
+```
+
+In the top-left, we see the residuals vs fitted values - and there is approximately equal residual variance across groups. In the top right, we see that the QQ plot hugs the $y=x$ line fairly tightly, indicating that the response variable does follow a normal distribution. The plots do not indicate a serious violation of our assumptions.
+
+
+## Problem 8.5
+
+The cancer survival data “PATIENT.DAT” was introduced in Example 8.9. Start with the exploratory data analysis, and check for NID error model assumptions. Consider a transformation of the data if the assumptions for error are not satisfied. Complete a one-way ANOVA to determine whether mean survival times differ by organ. If there are significant differences, follow up with appropriate multiple comparisons to determine which means differ and describe how they differ.
+
+
+First we will read in the data and visualize the distribution of survival times by group with boxplots and histograms. 
+
+```{r}
+survive <- read_csv("PATIENT.csv")
+
+times1 <- survive %>% gather() %>% na.omit() %>%
+    mutate(key = factor(key))
+
+ggplot(data = times1, aes(x = key, y = value, fill = key)) + geom_boxplot() +
+    xlab("cancer type") +
+    ylab("survival times") +
+    ggtitle("Boxplots of Survival times by Cancer type")
+```
+
+```{r}
+ggplot(data = times1, aes(x = value, fill = key)) + geom_histogram(bins = 25) + 
+    xlab("survival times") +
+    ggtitle("Histogram of Survival times by Cancer type")
+```
+
+This histograms indicates the repsonse variable does not follow a normal distribution which violates one key assumption for the one-way anova test. This indicates that a transformation on the resposne variable is desirable. We will fit the model on the untransformed data and look at the residual distribution regardless.
+
+```{r}
+L2 <- aov(data = times1, value ~ key)
+par(mfrow = c(2,2))
+plot(L2)
+```
+
+The residual plots are all over the place. The top left plot shows that there is unequal residual variance across groups. The Normal QQ plot has dramatic departures from the $y=x$ line, which indicates that the residuals from the model do not follow a normal distribution, which indicates that model isn't great.
+
+Now, we will take the log transformatin of survival time and plot it's distribution across groups with analogous visualizations.
+
+```{r}
+ggplot(data = times1, aes(x = log(value), fill = key)) + geom_histogram(bins = 25) + 
+    xlab("survival times") +
+    ggtitle("Histogram of log(Survival time) by Cancer type")
+```
+
+```{r}
+ggplot(data = times1, aes(x = key, y = log(value), fill = key)) + geom_boxplot() +
+    xlab("cancer type") +
+    ylab("survival times") +
+    ggtitle("Boxplots of log(Survival time) by Cancer type")
+```
+
+The boxplots indicate that the log transformation on survival time results in a distribution that is closer to normal than the untransformed data. This means the log transformation fits the assumptions of the one-way anova test better. We fit the one-way anova model and inspect the residuals again.
+
+```{r}
+L3 <- aov(data = times1, log(value) ~ key)
+par(mfrow = c(2,2))
+plot(L3)
+```
+
+These residual plots indicate that the log-transformed model's residuals follow an approximately normal distribution. In the top left, we see that the mean of rediuals is approximately zero for each group, with a tighter variances. The Normal QQ plot hugs the theoretical line more closely than in the untransformed model, which indicates that the log-transformed model's errors more closely follow a normal distribution. 
+
+Overall, the exploratoty boxplots and histograms indicate that the log-transformation on survival time results in a more normal distribution. The normality of response variable is a requisite for the proper implementation for the one-way anova test. Accordingly, we are not surprised to see that the log-transformed model's errors follow a normal distribution more closely.
+
+Now, we can run the one-way anova test on the log-transformed values. Using an alpha level of 0.05, we can reject the null hypothesis and conclude that not all the organs have the same mean survival time.
+
+```{r}
+oneway.test(data = times1, log(value) ~ key)
+```
+
+Now, we want to see which groups have a significant difference in mean survival time, using the $TukeyHSD()$ function in R. With a alpha level of 0.05, we conclude that only 2 pairs of cancer have significantly different mean survival times - the first pair is bronchus x breast cancer and the second pair is stomach x breast cancer. We also note that there is no significant difference between stomach and bronchus cancers. We can look at the p-values from the test, we can also look to see if the confidence interval for the difference in means includes zero or not.
+
+```{r}
+TukeyHSD(aov(data = times1, log(value) ~ key))
+
+plot(TukeyHSD(aov(data = times1, log(value) ~ key)))
+```
+
